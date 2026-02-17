@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3333",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@serwist/next": "^9.5.6",
     "google-auth-library": "^10.5.0",
     "google-spreadsheet": "^5.2.0",
     "nanoid": "^5.1.6",
@@ -26,6 +27,7 @@
     "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "serwist": "^9.5.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
