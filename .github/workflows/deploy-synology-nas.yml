@@ -41,7 +41,7 @@ jobs:
           GOOGLE_PRIVATE_KEY=$GOOGLE_PRIVATE_KEY
           GOOGLE_SHEET_ID=$GOOGLE_SHEET_ID
           GEMINI_API_KEY=$GEMINI_API_KEY
-          NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3100}
+          NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3333}
           EOF
 
           cd "$TARGET_DIR"
@@ -54,10 +54,10 @@ jobs:
 
           echo
           echo "== Smoke test =="
-          echo "Waiting for http://127.0.0.1:3100/ to be ready..."
+          echo "Waiting for http://127.0.0.1:3333/ to be ready..."
           ready=0
           for i in $(seq 1 20); do
-            if curl -sf http://127.0.0.1:3100/ > /dev/null 2>&1; then
+            if curl -sf http://127.0.0.1:3333/ > /dev/null 2>&1; then
               ready=1
               break
             fi
