@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TravelAPP — 出國旅遊計畫
 
-## Getting Started
+和旅伴一起整理行李、準備出國事項。有連結就能編輯，不需登入。
 
-First, run the development server:
+## 功能
+
+- **行李表** — 模板快速載入（海島/都市/滑雪/登山），分類收合，勾選打包進度
+- **事前準備** — 預設清單自動載入，勾選完成狀態
+- **AI 智慧推薦** — 根據目的地、天數、季節推薦行李（Gemini API）
+- **多人協作** — 分享連結給旅伴，30 秒自動同步
+- **手機友善** — 響應式設計，手機/平板/桌面都能用
+
+## 技術棧
+
+- **Next.js** (App Router) + TypeScript + Tailwind CSS
+- **Google Sheets** — 資料儲存
+- **Gemini API** — AI 行李推薦
+- **SWR** — 客戶端資料抓取 + polling
+
+## 快速開始
 
 ```bash
+# 安裝依賴
+npm install
+
+# 設定環境變數
+cp .env.example .env.local
+# 填入 Google Sheets 和 Gemini API 憑證
+
+# 啟動開發伺服器
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打開 http://localhost:3333
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 環境變數
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 變數 | 說明 |
+|------|------|
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Google 服務帳戶 email |
+| `GOOGLE_PRIVATE_KEY` | 服務帳戶私鑰 |
+| `GOOGLE_SHEET_ID` | Google Sheets 試算表 ID |
+| `GEMINI_API_KEY` | Gemini API 金鑰 |
+| `NEXT_PUBLIC_BASE_URL` | 網站網址 |
 
-## Learn More
+## 部署（Synology NAS）
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker compose up -d --build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+推送到 `main` 分支會自動透過 GitHub Actions 部署到 NAS。
