@@ -46,8 +46,7 @@ jobs:
 
           cd "$TARGET_DIR"
           docker compose down --remove-orphans || true
-          docker compose build --no-cache
-          docker compose up -d --remove-orphans
+          docker compose up -d --build --remove-orphans
 
           echo
           echo "== Containers (post-deploy) =="
@@ -56,14 +55,15 @@ jobs:
           echo
           echo "== Smoke test =="
           echo "Waiting for http://127.0.0.1:3333/ to be ready..."
+          sleep 10
           ready=0
-          for i in $(seq 1 20); do
+          for i in $(seq 1 30); do
             if curl -sf http://127.0.0.1:3333/ > /dev/null 2>&1; then
               ready=1
               break
             fi
-            echo "Not ready yet ($i/20)..."
-            sleep 3
+            echo "Not ready yet ($i/30)..."
+            sleep 5
           done
 
           if [ "$ready" -ne 1 ]; then
