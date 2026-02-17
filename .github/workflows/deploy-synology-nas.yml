@@ -1,0 +1,78 @@
+name: Deploy to Synology NAS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux, x64, gpu]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy (Docker Compose)
+        env:
+          GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.TRAVEL_GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.TRAVEL_GOOGLE_PRIVATE_KEY }}
+          GOOGLE_SHEET_ID: ${{ secrets.TRAVEL_GOOGLE_SHEET_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.TRAVEL_BASE_URL }}
+          TARGET_DIR: /volume1/docker/travel-app
+        run: |
+          set -euo pipefail
+
+          echo "Deploying to: $TARGET_DIR"
+          mkdir -p "$TARGET_DIR"
+
+          # Copy project files
+          rsync -a --delete \
+            --exclude node_modules \
+            --exclude .next \
+            --exclude .git \
+            --exclude .env \
+            --exclude .env.local \
+            ./ "$TARGET_DIR/"
+
+          # Write .env
+          cat > "$TARGET_DIR/.env" <<EOF
+          GOOGLE_SERVICE_ACCOUNT_EMAIL=$GOOGLE_SERVICE_ACCOUNT_EMAIL
+          GOOGLE_PRIVATE_KEY=$GOOGLE_PRIVATE_KEY
+          GOOGLE_SHEET_ID=$GOOGLE_SHEET_ID
+          GEMINI_API_KEY=$GEMINI_API_KEY
+          NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3100}
+          EOF
+
+          cd "$TARGET_DIR"
+          docker compose down --remove-orphans || true
+          docker compose up -d --build --remove-orphans
+
+          echo
+          echo "== Containers (post-deploy) =="
+          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | (head -n 1; grep "travel-app" || true)
+
+          echo
+          echo "== Smoke test =="
+          echo "Waiting for http://127.0.0.1:3100/ to be ready..."
+          ready=0
+          for i in $(seq 1 20); do
+            if curl -sf http://127.0.0.1:3100/ > /dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            echo "Not ready yet ($i/20)..."
+            sleep 3
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            echo "App did not become ready in time."
+            docker logs --tail=100 travel-app || true
+            exit 1
+          fi
+
+          echo "App is ready!"
+          echo
+          echo "== Logs (tail 30) =="
+          docker logs --tail=30 travel-app || true
+          echo "Deployment complete."

@@ -1,0 +1,11 @@
+services:
+  travel-app:
+    build: .
+    container_name: travel-app
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
