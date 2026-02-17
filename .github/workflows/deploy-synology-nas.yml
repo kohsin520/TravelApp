@@ -49,8 +49,14 @@ jobs:
           docker compose up -d --build --remove-orphans
 
           echo
-          echo "== Containers (post-deploy) =="
-          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | (head -n 1; grep "travel-app" || true)
+          echo "== Containers (ALL, post-deploy) =="
+          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+          echo
+          echo "== Docker compose ps =="
+          docker compose ps -a || true
+          echo
+          echo "== Port 3333 check =="
+          ss -tlnp 2>/dev/null | grep 3333 || netstat -tlnp 2>/dev/null | grep 3333 || echo "no ss/netstat"
 
           echo
           echo "== Smoke test =="
