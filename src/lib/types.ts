@@ -44,3 +44,40 @@ export const SEASONS: { value: Season; label: string }[] = [
   { value: 'autumn', label: '秋' },
   { value: 'winter', label: '冬' },
 ];
+
+// ─── Ticket & Hotel ───
+
+export type TicketType = 'flight' | 'train' | 'bus' | 'other';
+
+export interface Ticket {
+  id: string;
+  ticket_type: TicketType;
+  title: string;
+  datetime: string;
+  seat: string;
+  confirmation: string;
+  note: string;
+  image: string;
+  created_at: string;
+}
+
+export interface Hotel {
+  id: string;
+  hotel_name: string;
+  address: string;
+  check_in: string;
+  check_out: string;
+  confirmation: string;
+  map_url: string;
+  booking_url: string;
+  note: string;
+  image: string;
+  created_at: string;
+}
+
+export const TICKET_TYPES: { value: TicketType; label: string }[] = [
+  { value: 'flight', label: '飛機' },
+  { value: 'train', label: '火車' },
+  { value: 'bus', label: '巴士' },
+  { value: 'other', label: '其他' },
+];

@@ -30,6 +30,7 @@ export default function PackingList({ tripId, trip }: PackingListProps) {
   })).filter((g) => g.items.length > 0);
 
   return (
+    <section id="packing">
     <CollapsibleCard
       title="行李表"
       subtitle={totalCount > 0 ? `${packedCount}/${totalCount} 已打包` : undefined}
@@ -81,5 +82,6 @@ export default function PackingList({ tripId, trip }: PackingListProps) {
         </div>
       )}
     </CollapsibleCard>
+    </section>
   );
 }

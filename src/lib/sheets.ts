@@ -1,6 +1,6 @@
 import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
-import { Trip, PackingItem, ChecklistItem } from './types';
+import { Trip, PackingItem, ChecklistItem, Ticket, Hotel } from './types';
 
 function getAuth(): JWT {
   return new JWT({
@@ -195,5 +195,141 @@ export async function deleteChecklistItem(tripId: string, itemId: string): Promi
   const rows = await sheet.getRows();
   const row = rows.find((r) => r.get('id') === itemId);
   if (!row) throw new Error('Item not found');
+  await row.delete();
+}
+
+// ─── Ticket CRUD ───
+
+const TICKET_HEADERS = ['id', 'ticket_type', 'title', 'datetime', 'seat', 'confirmation', 'note', 'image', 'created_at'];
+
+async function getTicketSheet(doc: GoogleSpreadsheet, tripId: string) {
+  return getOrCreateSheet(doc, `${tripId}_tickets`, TICKET_HEADERS);
+}
+
+export async function getTickets(tripId: string): Promise<Ticket[]> {
+  const doc = await getDoc();
+  const sheet = await getTicketSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  return rows.map((r) => ({
+    id: r.get('id'),
+    ticket_type: r.get('ticket_type') as Ticket['ticket_type'],
+    title: r.get('title'),
+    datetime: r.get('datetime'),
+    seat: r.get('seat'),
+    confirmation: r.get('confirmation'),
+    note: r.get('note'),
+    image: r.get('image'),
+    created_at: r.get('created_at'),
+  }));
+}
+
+export async function addTicket(tripId: string, ticket: Omit<Ticket, 'created_at'>): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getTicketSheet(doc, tripId);
+  await sheet.addRow({
+    id: ticket.id,
+    ticket_type: ticket.ticket_type,
+    title: ticket.title,
+    datetime: ticket.datetime,
+    seat: ticket.seat,
+    confirmation: ticket.confirmation,
+    note: ticket.note,
+    image: ticket.image,
+    created_at: new Date().toISOString(),
+  });
+}
+
+export async function updateTicket(
+  tripId: string,
+  ticketId: string,
+  updates: Partial<Omit<Ticket, 'id' | 'created_at'>>
+): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getTicketSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const row = rows.find((r) => r.get('id') === ticketId);
+  if (!row) throw new Error('Ticket not found');
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) row.set(key, value);
+  }
+  await row.save();
+}
+
+export async function deleteTicket(tripId: string, ticketId: string): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getTicketSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const row = rows.find((r) => r.get('id') === ticketId);
+  if (!row) throw new Error('Ticket not found');
+  await row.delete();
+}
+
+// ─── Hotel CRUD ───
+
+const HOTEL_HEADERS = ['id', 'hotel_name', 'address', 'check_in', 'check_out', 'confirmation', 'map_url', 'booking_url', 'note', 'image', 'created_at'];
+
+async function getHotelSheet(doc: GoogleSpreadsheet, tripId: string) {
+  return getOrCreateSheet(doc, `${tripId}_hotels`, HOTEL_HEADERS);
+}
+
+export async function getHotels(tripId: string): Promise<Hotel[]> {
+  const doc = await getDoc();
+  const sheet = await getHotelSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  return rows.map((r) => ({
+    id: r.get('id'),
+    hotel_name: r.get('hotel_name'),
+    address: r.get('address'),
+    check_in: r.get('check_in'),
+    check_out: r.get('check_out'),
+    confirmation: r.get('confirmation'),
+    map_url: r.get('map_url'),
+    booking_url: r.get('booking_url'),
+    note: r.get('note'),
+    image: r.get('image'),
+    created_at: r.get('created_at'),
+  }));
+}
+
+export async function addHotel(tripId: string, hotel: Omit<Hotel, 'created_at'>): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getHotelSheet(doc, tripId);
+  await sheet.addRow({
+    id: hotel.id,
+    hotel_name: hotel.hotel_name,
+    address: hotel.address,
+    check_in: hotel.check_in,
+    check_out: hotel.check_out,
+    confirmation: hotel.confirmation,
+    map_url: hotel.map_url,
+    booking_url: hotel.booking_url,
+    note: hotel.note,
+    image: hotel.image,
+    created_at: new Date().toISOString(),
+  });
+}
+
+export async function updateHotel(
+  tripId: string,
+  hotelId: string,
+  updates: Partial<Omit<Hotel, 'id' | 'created_at'>>
+): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getHotelSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const row = rows.find((r) => r.get('id') === hotelId);
+  if (!row) throw new Error('Hotel not found');
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) row.set(key, value);
+  }
+  await row.save();
+}
+
+export async function deleteHotel(tripId: string, hotelId: string): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getHotelSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const row = rows.find((r) => r.get('id') === hotelId);
+  if (!row) throw new Error('Hotel not found');
   await row.delete();
 }

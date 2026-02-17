@@ -3,9 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Trip } from '@/lib/types';
+import { saveTripToHistory } from '@/lib/tripHistory';
 import TripHeader from '@/components/TripHeader';
+import TicketsList from '@/components/TicketsList';
+import HotelsList from '@/components/HotelsList';
 import PackingList from '@/components/PackingList';
 import PreDepartureChecklist from '@/components/PreDepartureChecklist';
+import SideNav from '@/components/SideNav';
+import BottomNav from '@/components/BottomNav';
 
 export default function TripPage() {
   const params = useParams();
@@ -21,7 +26,15 @@ export default function TripPage() {
         if (!res.ok) throw new Error('Not found');
         return res.json();
       })
-      .then(setTrip)
+      .then((data: Trip) => {
+        setTrip(data);
+        saveTripToHistory({
+          tripId,
+          trip_name: data.trip_name,
+          destination: data.destination,
+          created_at: data.created_at,
+        });
+      })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [tripId]);
@@ -50,11 +63,17 @@ export default function TripPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <TripHeader trip={trip} />
-        <PackingList tripId={tripId} trip={trip} />
-        <PreDepartureChecklist tripId={tripId} />
+      <div className="max-w-4xl mx-auto px-4 py-8 flex gap-8">
+        <SideNav />
+        <div className="flex-1 min-w-0 space-y-6 pb-20 md:pb-0">
+          <TripHeader trip={trip} />
+          <TicketsList tripId={tripId} />
+          <HotelsList tripId={tripId} />
+          <PackingList tripId={tripId} trip={trip} />
+          <PreDepartureChecklist tripId={tripId} />
+        </div>
       </div>
+      <BottomNav />
     </div>
   );
 }

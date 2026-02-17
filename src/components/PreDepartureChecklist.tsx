@@ -25,6 +25,7 @@ export default function PreDepartureChecklist({ tripId }: PreDepartureChecklistP
   };
 
   return (
+    <section id="checklist">
     <CollapsibleCard
       title="事前準備"
       subtitle={totalCount > 0 ? `${doneCount}/${totalCount} 已完成` : undefined}
@@ -72,5 +73,6 @@ export default function PreDepartureChecklist({ tripId }: PreDepartureChecklistP
         </div>
       )}
     </CollapsibleCard>
+    </section>
   );
 }
