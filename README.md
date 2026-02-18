@@ -50,3 +50,18 @@ docker compose up -d --build
 ```
 
 推送到 `main` 分支會自動透過 GitHub Actions 部署到 NAS。
+
+### 內網 DNS 設定（hairpin NAT 問題）
+
+家裡連 WiFi 時，從內網打 DDNS 網址可能因路由器不支援 hairpin NAT 而無法連線。
+在每台裝置的 `/etc/hosts` 加入以下設定即可讓 HTTPS domain 走內網：
+
+```
+192.168.31.101    travel.wenchiehlee.synology.me
+```
+
+macOS 套用後需清 DNS cache：
+
+```bash
+sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder
+```
