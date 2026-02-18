@@ -59,12 +59,12 @@ jobs:
           ss -tlnp 2>/dev/null | grep 3333 || netstat -tlnp 2>/dev/null | grep 3333 || echo "no ss/netstat"
 
           echo
-          echo "== Smoke test =="
-          echo "Waiting for http://127.0.0.1:3333/ to be ready..."
+          echo "== Smoke test (via docker exec) =="
+          echo "Waiting for travel-app container to be ready..."
           sleep 10
           ready=0
           for i in $(seq 1 30); do
-            if curl -sf http://127.0.0.1:3333/ > /dev/null 2>&1; then
+            if docker exec travel-app wget -q -O /dev/null http://127.0.0.1:3000/ 2>/dev/null; then
               ready=1
               break
             fi
