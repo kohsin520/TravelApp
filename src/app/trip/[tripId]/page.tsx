@@ -70,7 +70,7 @@ export default function TripPage() {
           <TicketsList tripId={tripId} />
           <HotelsList tripId={tripId} />
           <PackingList tripId={tripId} trip={trip} />
-          <PreDepartureChecklist tripId={tripId} />
+          <PreDepartureChecklist tripId={tripId} trip={trip} />
         </div>
       </div>
       <BottomNav />

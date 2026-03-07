@@ -82,6 +82,35 @@ export async function recognizeHotelFromImage(base64: string, mimeType: string):
   return JSON.parse(jsonMatch[0]) as RecognizedHotel;
 }
 
+export async function getAiChecklistRecommendations(
+  destination: string,
+  days: number,
+  season: string,
+  tripType: string
+): Promise<string[]> {
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
+
+  const prompt = `你是旅遊出發前準備專家。請根據以下旅行資訊，生成出發前需要完成的準備事項清單：
+- 目的地：${destination}
+- 天數：${days} 天
+- 季節：${season}
+- 旅行類型：${tripType}
+
+請回傳 JSON 格式的字串陣列，列出 8~15 個出發前需要完成的具體行動項目（繁體中文），例如辦簽證、換外幣、買保險、預訂餐廳等。
+根據目的地和旅行類型給出特別相關的建議，不要只列通用項目。
+
+回傳格式：
+["準備事項1", "準備事項2", ...]
+
+只回傳 JSON 陣列，不要有其他文字。`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error('無法解析 AI 回應');
+  return JSON.parse(jsonMatch[0]) as string[];
+}
+
 interface AiRecommendation {
   category: PackingCategory;
   items: string[];
