@@ -36,13 +36,13 @@ jobs:
             ./ "$TARGET_DIR/"
 
           # Write .env
-          cat > "$TARGET_DIR/.env" <<EOF
-          GOOGLE_SERVICE_ACCOUNT_EMAIL=$GOOGLE_SERVICE_ACCOUNT_EMAIL
-          GOOGLE_PRIVATE_KEY=$GOOGLE_PRIVATE_KEY
-          GOOGLE_SHEET_ID=$GOOGLE_SHEET_ID
-          GEMINI_API_KEY=$GEMINI_API_KEY
-          NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3333}
-          EOF
+          {
+            echo "GOOGLE_SERVICE_ACCOUNT_EMAIL=$GOOGLE_SERVICE_ACCOUNT_EMAIL"
+            echo "GOOGLE_SHEET_ID=$GOOGLE_SHEET_ID"
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY"
+            echo "NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3333}"
+            printf 'GOOGLE_PRIVATE_KEY=%s\n' "$GOOGLE_PRIVATE_KEY"
+          } > "$TARGET_DIR/.env"
 
           cd "$TARGET_DIR"
           docker compose down --remove-orphans || true
