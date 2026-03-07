@@ -200,7 +200,7 @@ export async function deleteChecklistItem(tripId: string, itemId: string): Promi
 
 // ─── Ticket CRUD ───
 
-const TICKET_HEADERS = ['id', 'ticket_type', 'title', 'datetime', 'seat', 'confirmation', 'note', 'image', 'created_at'];
+const TICKET_HEADERS = ['id', 'ticket_type', 'title', 'datetime', 'seat', 'confirmation', 'note', 'image', 'order', 'created_at'];
 
 async function getTicketSheet(doc: GoogleSpreadsheet, tripId: string) {
   return getOrCreateSheet(doc, `${tripId}_tickets`, TICKET_HEADERS);
@@ -219,6 +219,7 @@ export async function getTickets(tripId: string): Promise<Ticket[]> {
     confirmation: r.get('confirmation'),
     note: r.get('note'),
     image: r.get('image'),
+    order: Number(r.get('order')) || 0,
     created_at: r.get('created_at'),
   }));
 }
@@ -235,6 +236,7 @@ export async function addTicket(tripId: string, ticket: Omit<Ticket, 'created_at
     confirmation: ticket.confirmation,
     note: ticket.note,
     image: ticket.image,
+    order: ticket.order ?? 0,
     created_at: new Date().toISOString(),
   });
 }
@@ -264,9 +266,21 @@ export async function deleteTicket(tripId: string, ticketId: string): Promise<vo
   await row.delete();
 }
 
+export async function bulkUpdateTicketOrder(tripId: string, items: { id: string; order: number }[]): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getTicketSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const orderMap = new Map(items.map((i) => [i.id, i.order]));
+  const toUpdate = rows.filter((r) => orderMap.has(r.get('id')));
+  for (const row of toUpdate) {
+    row.set('order', orderMap.get(row.get('id'))!);
+  }
+  await Promise.all(toUpdate.map((r) => r.save()));
+}
+
 // ─── Hotel CRUD ───
 
-const HOTEL_HEADERS = ['id', 'hotel_name', 'address', 'check_in', 'check_out', 'confirmation', 'map_url', 'booking_url', 'note', 'image', 'created_at'];
+const HOTEL_HEADERS = ['id', 'hotel_name', 'address', 'check_in', 'check_out', 'confirmation', 'map_url', 'booking_url', 'note', 'image', 'order', 'created_at'];
 
 async function getHotelSheet(doc: GoogleSpreadsheet, tripId: string) {
   return getOrCreateSheet(doc, `${tripId}_hotels`, HOTEL_HEADERS);
@@ -287,6 +301,7 @@ export async function getHotels(tripId: string): Promise<Hotel[]> {
     booking_url: r.get('booking_url'),
     note: r.get('note'),
     image: r.get('image'),
+    order: Number(r.get('order')) || 0,
     created_at: r.get('created_at'),
   }));
 }
@@ -305,6 +320,7 @@ export async function addHotel(tripId: string, hotel: Omit<Hotel, 'created_at'>)
     booking_url: hotel.booking_url,
     note: hotel.note,
     image: hotel.image,
+    order: hotel.order ?? 0,
     created_at: new Date().toISOString(),
   });
 }
@@ -332,4 +348,16 @@ export async function deleteHotel(tripId: string, hotelId: string): Promise<void
   const row = rows.find((r) => r.get('id') === hotelId);
   if (!row) throw new Error('Hotel not found');
   await row.delete();
+}
+
+export async function bulkUpdateHotelOrder(tripId: string, items: { id: string; order: number }[]): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getHotelSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const orderMap = new Map(items.map((i) => [i.id, i.order]));
+  const toUpdate = rows.filter((r) => orderMap.has(r.get('id')));
+  for (const row of toUpdate) {
+    row.set('order', orderMap.get(row.get('id'))!);
+  }
+  await Promise.all(toUpdate.map((r) => r.save()));
 }

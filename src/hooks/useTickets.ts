@@ -8,6 +8,10 @@ const fetcher = async (url: string) => {
   return Array.isArray(data) ? data : [];
 };
 
+function sortByOrder(tickets: Ticket[]): Ticket[] {
+  return [...tickets].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+
 export function useTickets(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR<Ticket[]>(
     tripId ? `/api/tickets?tripId=${tripId}` : null,
@@ -50,13 +54,38 @@ export function useTickets(tripId: string) {
     mutate();
   };
 
+  const reorderTickets = async (ordered: Ticket[]) => {
+    const items = ordered.map((t, i) => ({ id: t.id, order: i }));
+    const updated = ordered.map((t, i) => ({ ...t, order: i }));
+    mutate(updated, false);
+    await fetch('/api/tickets', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tripId, items }),
+    });
+    mutate();
+  };
+
+  const autoSortTickets = async () => {
+    const current = data ?? [];
+    const sorted = [...current].sort((a, b) => {
+      if (!a.datetime && !b.datetime) return 0;
+      if (!a.datetime) return -1;
+      if (!b.datetime) return 1;
+      return a.datetime.localeCompare(b.datetime);
+    });
+    await reorderTickets(sorted);
+  };
+
   return {
-    tickets: data ?? [],
+    tickets: sortByOrder(data ?? []),
     isLoading,
     isError: !!error,
     mutate,
     addTicket,
     updateTicket,
     deleteTicket,
+    reorderTickets,
+    autoSortTickets,
   };
 }

@@ -40,6 +40,8 @@ export default function Home() {
           created_at: new Date().toISOString(),
         });
         router.push(`/trip/${data.tripId}`);
+      } else {
+        alert(`建立旅程失敗：${data.error || '未知錯誤'}`);
       }
     } catch {
       alert('建立旅程失敗，請稍後再試');

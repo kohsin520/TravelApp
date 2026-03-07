@@ -15,11 +15,13 @@ interface TicketCardProps {
   ticket: Ticket;
   onUpdate: (ticketId: string, updates: Partial<Ticket>) => Promise<void>;
   onDelete: (ticketId: string) => Promise<void>;
+  dragHandle?: React.ReactNode;
 }
 
-export default function TicketCard({ ticket, onUpdate, onDelete }: TicketCardProps) {
+export default function TicketCard({ ticket, onUpdate, onDelete, dragHandle }: TicketCardProps) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(ticket);
+  const [datetimeTbd, setDatetimeTbd] = useState(!ticket.datetime);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -71,15 +73,30 @@ export default function TicketCard({ ticket, onUpdate, onDelete }: TicketCardPro
               className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
             />
           </label>
-          <label className="block">
-            <span className="text-xs text-gray-500">日期時間</span>
+          <div className="block">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">日期時間</span>
+              <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={datetimeTbd}
+                  onChange={(e) => {
+                    setDatetimeTbd(e.target.checked);
+                    if (e.target.checked) setForm({ ...form, datetime: '' });
+                  }}
+                  className="rounded"
+                />
+                未定
+              </label>
+            </div>
             <input
               type="datetime-local"
               value={form.datetime}
+              disabled={datetimeTbd}
               onChange={(e) => setForm({ ...form, datetime: e.target.value })}
-              className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+              className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:bg-gray-50 disabled:text-gray-400"
             />
-          </label>
+          </div>
           <label className="block">
             <span className="text-xs text-gray-500">座位</span>
             <input
@@ -130,12 +147,15 @@ export default function TicketCard({ ticket, onUpdate, onDelete }: TicketCardPro
     <div className="border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3 min-w-0 flex-1">
+          {dragHandle}
           <span className="text-2xl shrink-0">{typeIcons[ticket.ticket_type] || '🎫'}</span>
           <div className="min-w-0">
             <h3 className="font-medium text-gray-800 truncate">{ticket.title || '未命名票券'}</h3>
             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-gray-500">
-              {ticket.datetime && (
+              {ticket.datetime ? (
                 <span>{new Date(ticket.datetime).toLocaleString('zh-TW', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              ) : (
+                <span className="text-orange-400">日期未定</span>
               )}
               {ticket.seat && <span>座位: {ticket.seat}</span>}
               {ticket.confirmation && <span className="font-mono text-blue-600">{ticket.confirmation}</span>}

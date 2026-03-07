@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { getTickets, addTicket, updateTicket, deleteTicket } from '@/lib/sheets';
+import { getTickets, addTicket, updateTicket, deleteTicket, bulkUpdateTicketOrder } from '@/lib/sheets';
 
 export async function GET(req: NextRequest) {
   try {
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       confirmation: ticket.confirmation || '',
       note: ticket.note || '',
       image: ticket.image || '',
+      order: ticket.order ?? 0,
     };
     await addTicket(tripId, newTicket);
     return NextResponse.json({ success: true, id: newTicket.id });
@@ -51,6 +52,21 @@ export async function PATCH(req: NextRequest) {
   } catch (error) {
     console.error('Update ticket error:', error);
     return NextResponse.json({ error: '更新票券失敗' }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { tripId, items } = body;
+    if (!tripId || !Array.isArray(items)) {
+      return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 });
+    }
+    await bulkUpdateTicketOrder(tripId, items);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Bulk update ticket order error:', error);
+    return NextResponse.json({ error: '更新票券排序失敗' }, { status: 500 });
   }
 }
 

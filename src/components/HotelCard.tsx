@@ -8,9 +8,10 @@ interface HotelCardProps {
   hotel: Hotel;
   onUpdate: (hotelId: string, updates: Partial<Hotel>) => Promise<void>;
   onDelete: (hotelId: string) => Promise<void>;
+  dragHandle?: React.ReactNode;
 }
 
-export default function HotelCard({ hotel, onUpdate, onDelete }: HotelCardProps) {
+export default function HotelCard({ hotel, onUpdate, onDelete, dragHandle }: HotelCardProps) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(hotel);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -138,6 +139,7 @@ export default function HotelCard({ hotel, onUpdate, onDelete }: HotelCardProps)
     <div className="border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3 min-w-0 flex-1">
+          {dragHandle}
           <span className="text-2xl shrink-0">🏨</span>
           <div className="min-w-0">
             <h3 className="font-medium text-gray-800 truncate">{hotel.hotel_name || '未命名住宿'}</h3>

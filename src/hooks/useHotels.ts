@@ -8,6 +8,10 @@ const fetcher = async (url: string) => {
   return Array.isArray(data) ? data : [];
 };
 
+function sortByOrder(hotels: Hotel[]): Hotel[] {
+  return [...hotels].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+
 export function useHotels(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR<Hotel[]>(
     tripId ? `/api/hotels?tripId=${tripId}` : null,
@@ -50,13 +54,38 @@ export function useHotels(tripId: string) {
     mutate();
   };
 
+  const reorderHotels = async (ordered: Hotel[]) => {
+    const items = ordered.map((h, i) => ({ id: h.id, order: i }));
+    const updated = ordered.map((h, i) => ({ ...h, order: i }));
+    mutate(updated, false);
+    await fetch('/api/hotels', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tripId, items }),
+    });
+    mutate();
+  };
+
+  const autoSortHotels = async () => {
+    const current = data ?? [];
+    const sorted = [...current].sort((a, b) => {
+      if (!a.check_in && !b.check_in) return 0;
+      if (!a.check_in) return -1;
+      if (!b.check_in) return 1;
+      return a.check_in.localeCompare(b.check_in);
+    });
+    await reorderHotels(sorted);
+  };
+
   return {
-    hotels: data ?? [],
+    hotels: sortByOrder(data ?? []),
     isLoading,
     isError: !!error,
     mutate,
     addHotel,
     updateHotel,
     deleteHotel,
+    reorderHotels,
+    autoSortHotels,
   };
 }

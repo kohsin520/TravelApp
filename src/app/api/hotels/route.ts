@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { getHotels, addHotel, updateHotel, deleteHotel } from '@/lib/sheets';
+import { getHotels, addHotel, updateHotel, deleteHotel, bulkUpdateHotelOrder } from '@/lib/sheets';
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       booking_url: hotel.booking_url || '',
       note: hotel.note || '',
       image: hotel.image || '',
+      order: hotel.order ?? 0,
     };
     await addHotel(tripId, newHotel);
     return NextResponse.json({ success: true, id: newHotel.id });
@@ -53,6 +54,21 @@ export async function PATCH(req: NextRequest) {
   } catch (error) {
     console.error('Update hotel error:', error);
     return NextResponse.json({ error: '更新住宿失敗' }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { tripId, items } = body;
+    if (!tripId || !Array.isArray(items)) {
+      return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 });
+    }
+    await bulkUpdateHotelOrder(tripId, items);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Bulk update hotel order error:', error);
+    return NextResponse.json({ error: '更新住宿排序失敗' }, { status: 500 });
   }
 }
 

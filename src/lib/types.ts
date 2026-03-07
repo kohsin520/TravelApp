@@ -58,6 +58,7 @@ export interface Ticket {
   confirmation: string;
   note: string;
   image: string;
+  order: number;
   created_at: string;
 }
 
@@ -72,6 +73,7 @@ export interface Hotel {
   booking_url: string;
   note: string;
   image: string;
+  order: number;
   created_at: string;
 }
 
