@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ tripId });
   } catch (error) {
     console.error('Create trip error:', error);
-    return NextResponse.json({ error: '建立旅程失敗' }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: `建立旅程失敗：${message}` }, { status: 500 });
   }
 }
 
