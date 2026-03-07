@@ -257,16 +257,36 @@ export async function getAiChecklistRecommendations(
 - 旅行類型：${tripType}
 
 請務必涵蓋以下面向（若適用）：
-1. 【入境文件】：台灣護照前往該目的地是否需要簽證？需要哪種簽證（落地簽/電子簽/事先申辦）？還是免簽但需要 eTA/電子旅行授權？需要回程機票或財力證明嗎？
-2. 【健康/衛生】：是否需要打疫苗？是否需要黃熱病證明？當地有哪些常見疾病需預防？
-3. 【金融】：當地使用什麼貨幣？是否需要事先換匯？信用卡普及度如何？
-4. 【通訊】：當地網路/SIM卡建議，台灣手機是否需要特別設定？
-5. 【保險】：旅遊保險、醫療保險建議
-6. 【交通/住宿】：提前預訂建議、交通票券
-7. 【目的地特殊規定】：該地特有的法規、禁忌、注意事項（如新加坡禁止帶口香糖、中東著裝規定等）
-8. 【季節相關】：該季節的天氣/活動特殊準備
+1. 【入境文件】：根據你確實知道的資訊，台灣護照前往該目的地是否需要簽證或電子入境申請？請依事實回答，不可猜測或假設免簽。以下是已知的正確資訊，請直接使用對應網址：
+   - 香港：需申請「預辦入境登記」→ https://www.immd.gov.hk/hkt/services/visas/pre-arrival_registration_for_taiwan_residents.html
+   - 日本：免簽，但建議填寫 Visit Japan Web → https://vjw-lp.digital.go.jp/
+   - 澳洲：需申請 eTA → https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/electronic-travel-authority-601
+   - 紐西蘭：需申請 NZeTA → https://www.immigration.govt.nz/new-zealand-visas/visa-type/nzeta
+   - 美國：需申請 ESTA → https://esta.cbp.dhs.gov/
+   - 加拿大：需申請 eTA → https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta.html
+   - 英國：需申請 ETA → https://www.gov.uk/apply-for-an-eta
+   - 新加坡：入境前需填 SG Arrival Card → https://eservices.ica.gov.sg/sgarrivalcard/
+   - 馬來西亞：需填 e-Arrival → https://imigresen-online.imi.gov.my/mdac/main
+   - 中國大陸：需台胞證，不可用台灣護照入境
+   - 印度：需事先申辦電子簽（e-Visa）→ https://indianvisaonline.gov.in/evisa/
+   - 其他地區請依實際規定判斷，不確定時提醒使用者出發前確認
 
-請列出 10~15 個具體可執行的行動項目（繁體中文），每項用動詞開頭（如「確認」、「申請」、「購買」、「下載」）。
+   若該目的地有對應網址，請在清單項目中附上，格式：「申請 XXX → https://...」
+2. 【健康/衛生】：是否需要打疫苗或準備醫療文件？
+3. 【金融】：請根據目的地的實際消費習慣給出具體建議，說明刷卡方不方便、現金用量大不大，格式範例：「換港幣備用（香港刷卡普及，現金備 2 成即可）」、「換日幣（小店多不收卡，建議帶 5 成現金）」、「泰銖為主（攤販市場現金為主，建議帶 6 成現金）」。要讓使用者清楚知道到底要不要大量換錢。
+4. 【通訊/網路】：根據目的地給出一個明確建議——eSIM 還是國際漫遊哪個更划算、更方便？說明理由（例如「日本建議買 eSIM，比漫遊便宜很多」或「短程港澳開漫遊即可」）。若目的地在中國大陸，必須提醒需提前在台灣購買並設定好 VPN。
+5. 【保險】：旅遊平安險
+6. 【交通/住宿】：提前預訂或票券建議
+7. 【目的地特殊規定】：重要法規、禁忌（如有）
+8. 【季節相關】：該季節特殊準備（如有）
+
+注意事項：
+- 不要列任何衣物、服裝類建議（行李清單另有處理）
+- 通訊只給一個建議，不要同時列「買 SIM 卡」又列「開漫遊」
+
+請列出 8~12 個具體可執行的行動項目（繁體中文）：
+- 每項用動詞開頭（如「確認」、「申請」、「購買」、「下載」）
+- 一般項目控制在 18 字以內，簡潔精準；若附有網址則不限字數
 
 回傳格式：
 ["準備事項1", "準備事項2", ...]
