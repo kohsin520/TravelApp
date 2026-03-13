@@ -18,6 +18,15 @@ jobs:
           GOOGLE_PRIVATE_KEY: ${{ secrets.TRAVEL_GOOGLE_PRIVATE_KEY }}
           GOOGLE_SHEET_ID: ${{ secrets.TRAVEL_GOOGLE_SHEET_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+          GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
+          GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
+          GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
+          GEMINI_API_KEY_7: ${{ secrets.GEMINI_API_KEY_7 }}
+          AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}
+          LLM_APP_NAME: ${{ secrets.LLM_APP_NAME }}
           NEXT_PUBLIC_BASE_URL: ${{ secrets.TRAVEL_BASE_URL }}
           TARGET_DIR: /volume1/docker/travel-app
         run: |
@@ -39,9 +48,18 @@ jobs:
           {
             echo "GOOGLE_SERVICE_ACCOUNT_EMAIL=$GOOGLE_SERVICE_ACCOUNT_EMAIL"
             echo "GOOGLE_SHEET_ID=$GOOGLE_SHEET_ID"
-            echo "GEMINI_API_KEY=$GEMINI_API_KEY"
             echo "NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3333}"
             printf 'GOOGLE_PRIVATE_KEY=%s\n' "$GOOGLE_PRIVATE_KEY"
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY"
+            echo "GEMINI_API_KEY_1=$GEMINI_API_KEY_1"
+            echo "GEMINI_API_KEY_2=$GEMINI_API_KEY_2"
+            echo "GEMINI_API_KEY_3=$GEMINI_API_KEY_3"
+            echo "GEMINI_API_KEY_4=$GEMINI_API_KEY_4"
+            echo "GEMINI_API_KEY_5=$GEMINI_API_KEY_5"
+            echo "GEMINI_API_KEY_6=$GEMINI_API_KEY_6"
+            echo "GEMINI_API_KEY_7=$GEMINI_API_KEY_7"
+            echo "AMPLITUDE_API_KEY=$AMPLITUDE_API_KEY"
+            echo "LLM_APP_NAME=$LLM_APP_NAME"
           } > "$TARGET_DIR/.env"
 
           cd "$TARGET_DIR"
