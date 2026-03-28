@@ -22,7 +22,7 @@ export default function ChecklistItem({ item, onToggle, onDelete }: ChecklistIte
       </span>
       <button
         onClick={() => onDelete(item.id)}
-        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
+        className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

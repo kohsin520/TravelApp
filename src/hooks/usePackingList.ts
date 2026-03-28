@@ -26,7 +26,6 @@ export function usePackingList(tripId: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tripId, itemId, updates: { packed } }),
     });
-    mutate();
   };
 
   const addItems = async (items: { category: string; item_name: string; source?: string }[], replaceSource?: string) => {

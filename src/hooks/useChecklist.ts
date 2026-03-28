@@ -25,7 +25,6 @@ export function useChecklist(tripId: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tripId, itemId, updates: { done } }),
     });
-    mutate();
   };
 
   const addItems = async (items: { task_name: string }[]) => {
