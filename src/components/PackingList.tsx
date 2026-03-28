@@ -19,9 +19,12 @@ export default function PackingList({ tripId, trip }: PackingListProps) {
   const packedCount = items.filter((i) => i.packed).length;
   const totalCount = items.length;
 
-  // Template: replace all preset items with new template
   const loadTemplate = (newItems: { category: string; item_name: string; source?: string }[]) => {
     addItems(newItems, 'preset');
+  };
+
+  const reorganizeWithAi = (newItems: { category: string; item_name: string; source: string }[]) => {
+    addItems(newItems, 'all');
   };
 
   const groupedItems = CATEGORIES.map((cat) => ({
@@ -46,7 +49,7 @@ export default function PackingList({ tripId, trip }: PackingListProps) {
           </div>
 
           {/* AI recommend */}
-          <AiRecommendForm trip={trip} onAddItems={addItems} />
+          <AiRecommendForm trip={trip} existingItems={items} onAddItems={addItems} onReorganize={reorganizeWithAi} />
 
           {/* Packing categories */}
           {groupedItems.length > 0 ? (

@@ -131,7 +131,7 @@ export async function deletePackingItemsBySource(tripId: string, source: string)
   const doc = await getDoc();
   const sheet = await getPackingSheet(doc, tripId);
   const rows = await sheet.getRows();
-  const toDelete = rows.filter((r) => r.get('source') === source);
+  const toDelete = source === 'all' ? rows : rows.filter((r) => r.get('source') === source);
   // Delete in reverse order to avoid index shifting
   for (let i = toDelete.length - 1; i >= 0; i--) {
     await toDelete[i].delete();
