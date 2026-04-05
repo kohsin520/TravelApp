@@ -178,17 +178,16 @@ export async function updateChecklistItem(
   tripId: string,
   itemId: string,
   updates: Partial<Pick<ChecklistItem, 'done' | 'task_name'>>
-): Promise<void> {
+): Promise<string> {
   const doc = await getDoc();
   const sheet = await getChecklistSheet(doc, tripId);
   const rows = await sheet.getRows();
   const row = rows.find((r) => r.get('id') === itemId);
   if (!row) throw new Error('Item not found');
-  console.log('Before save, done:', row.get('done'));
   if (updates.done !== undefined) row.set('done', String(updates.done));
   if (updates.task_name !== undefined) row.set('task_name', updates.task_name);
   await row.save();
-  console.log('After save, done:', row.get('done'));
+  return row.get('done');
 }
 
 export async function deleteChecklistItem(tripId: string, itemId: string): Promise<void> {

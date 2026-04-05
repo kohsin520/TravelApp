@@ -47,8 +47,8 @@ export async function PATCH(req: NextRequest) {
     if (!tripId || !itemId) {
       return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 });
     }
-    await updateChecklistItem(tripId, itemId, updates);
-    return NextResponse.json({ success: true });
+    const savedDone = await updateChecklistItem(tripId, itemId, updates);
+    return NextResponse.json({ success: true, savedDone });
   } catch (error) {
     console.error('Update checklist error:', error);
     return NextResponse.json({ error: '更新準備事項失敗' }, { status: 500 });
