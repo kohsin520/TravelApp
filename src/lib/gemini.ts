@@ -369,3 +369,64 @@ export async function getAiTicketRecommendations(
   if (!jsonMatch) throw new Error('無法解析 AI 回應');
   return JSON.parse(jsonMatch[0]) as AiTicketRecommendation[];
 }
+
+// ─── Itinerary AI ───
+
+export interface ItineraryItemAI {
+  day: number;
+  period: 'morning' | 'afternoon' | 'evening';
+  activity: string;
+}
+
+export async function generateItinerary(
+  destination: string,
+  days: number,
+  tripType: string,
+  weatherSummary?: string
+): Promise<ItineraryItemAI[]> {
+  const weatherLine = weatherSummary ? `\n- 天氣：${weatherSummary}` : '';
+  const prompt = `你是旅遊規劃師。請為以下旅行生成詳細的每日行程：
+- 目的地：${destination}
+- 天數：${days} 天
+- 旅遊類型：${tripType}${weatherLine}
+
+請生成完整 ${days} 天的行程，每天分成早上(morning)/下午(afternoon)/晚上(evening)，每個時段 1-3 個活動。
+活動名稱要具體，包含景點或餐廳名稱（繁體中文為主，可附英文名稱）。
+
+回傳 JSON 陣列（不要有其他文字）：
+[
+  { "day": 1, "period": "morning", "activity": "活動名稱" },
+  { "day": 1, "period": "afternoon", "activity": "活動名稱" }
+]`;
+
+  const text = await generateText(prompt);
+  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error('無法解析 AI 行程回應');
+  return JSON.parse(jsonMatch[0]) as ItineraryItemAI[];
+}
+
+export async function parseItinerary(itineraryText: string): Promise<ItineraryItemAI[]> {
+  const prompt = `請將以下行程文字解析成結構化格式。
+
+行程文字：
+${itineraryText}
+
+解析規則：
+- day 從 1 開始（第一天=1, Day1=1, 第二天=2...）
+- period 只能是以下三種：
+  - 早上/上午/morning/AM → "morning"
+  - 下午/午後/afternoon/PM → "afternoon"
+  - 晚上/夜晚/evening/night → "evening"
+  - 若無法判斷：早餐類→morning，晚餐類→evening，其他→afternoon
+- activity：保留原文活動名稱，保持繁體中文
+
+回傳 JSON 陣列（不要有其他文字）：
+[
+  { "day": 1, "period": "morning", "activity": "活動名稱" }
+]`;
+
+  const text = await generateText(prompt);
+  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error('無法解析行程文字');
+  return JSON.parse(jsonMatch[0]) as ItineraryItemAI[];
+}
