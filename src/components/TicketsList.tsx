@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Ticket, TicketType, TICKET_TYPES, Trip } from '@/lib/types';
 import { useTickets } from '@/hooks/useTickets';
 import { compressImage } from '@/lib/imageUtils';
+import { AiTicketRecommendation } from '@/lib/gemini';
 import CollapsibleCard from './CollapsibleCard';
 import TicketCard from './TicketCard';
 import {
@@ -97,7 +98,7 @@ export default function TicketsList({ tripId, trip }: TicketsListProps) {
   const [pendingItems, setPendingItems] = useState<PendingTicket[]>([]);
   const [addingAll, setAddingAll] = useState(false);
   const [aiRecommendPending, setAiRecommendPending] = useState<
-    { title: string; ticket_type: TicketType; checked: boolean }[]
+    (AiTicketRecommendation & { checked: boolean })[]
   >([]);
   const [aiRecommending, setAiRecommending] = useState(false);
   const [addingAiRecommend, setAddingAiRecommend] = useState(false);
@@ -236,8 +237,7 @@ export default function TicketsList({ tripId, trip }: TicketsListProps) {
     }
   };
 
-  const handleAddAiRecommend = async () => {
-    const selected = aiRecommendPending.filter((r) => r.checked);
+  const handleAddAiRecommend = async (selected: AiTicketRecommendation[]) => {
     if (!selected.length) return;
     setAddingAiRecommend(true);
     try {
@@ -441,7 +441,7 @@ export default function TicketsList({ tripId, trip }: TicketsListProps) {
                     全選
                   </button>
                   <button
-                    onClick={handleAddAiRecommend}
+                    onClick={() => handleAddAiRecommend(aiRecommendPending.filter(i => i.checked))}
                     disabled={addingAiRecommend || aiRecommendPending.every((r) => !r.checked)}
                     className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50"
                   >
