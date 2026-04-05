@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Ticket, TicketType, TICKET_TYPES } from '@/lib/types';
+import { Ticket, TicketType, TICKET_TYPES, Trip } from '@/lib/types';
 import { useTickets } from '@/hooks/useTickets';
 import { compressImage } from '@/lib/imageUtils';
 import CollapsibleCard from './CollapsibleCard';
@@ -25,6 +25,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 interface TicketsListProps {
   tripId: string;
+  trip?: Trip;
 }
 
 type PendingTicket = {
@@ -85,7 +86,7 @@ function SortableTicket({
   );
 }
 
-export default function TicketsList({ tripId }: TicketsListProps) {
+export default function TicketsList({ tripId, trip }: TicketsListProps) {
   const { tickets, isLoading, addTicket, updateTicket, deleteTicket, reorderTickets, autoSortTickets } = useTickets(tripId);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -95,6 +96,11 @@ export default function TicketsList({ tripId }: TicketsListProps) {
   const [autoSorting, setAutoSorting] = useState(false);
   const [pendingItems, setPendingItems] = useState<PendingTicket[]>([]);
   const [addingAll, setAddingAll] = useState(false);
+  const [aiRecommendPending, setAiRecommendPending] = useState<
+    { title: string; ticket_type: TicketType; checked: boolean }[]
+  >([]);
+  const [aiRecommending, setAiRecommending] = useState(false);
+  const [addingAiRecommend, setAddingAiRecommend] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -199,6 +205,58 @@ export default function TicketsList({ tripId }: TicketsListProps) {
       await autoSortTickets();
     } finally {
       setAutoSorting(false);
+    }
+  };
+
+  const handleAiRecommend = async () => {
+    if (!trip) return;
+    setAiRecommending(true);
+    try {
+      const res = await fetch('/api/ai/recommend-tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destination: trip.destination,
+          days: trip.days,
+          tripType: trip.trip_type,
+        }),
+      });
+      if (!res.ok) throw new Error('推薦失敗');
+      const data = await res.json();
+      setAiRecommendPending(
+        (data.recommendations as { title: string; ticket_type: TicketType }[]).map((r) => ({
+          ...r,
+          checked: true,
+        }))
+      );
+    } catch {
+      alert('AI 推薦失敗，請稍後再試');
+    } finally {
+      setAiRecommending(false);
+    }
+  };
+
+  const handleAddAiRecommend = async () => {
+    const selected = aiRecommendPending.filter((r) => r.checked);
+    if (!selected.length) return;
+    setAddingAiRecommend(true);
+    try {
+      for (const item of selected) {
+        await addTicket({
+          ticket_type: item.ticket_type,
+          title: item.title,
+          datetime: '',
+          datetimeTbd: true,
+          seat: '',
+          confirmation: '',
+          note: '',
+          image: '',
+          order: 0,
+        });
+      }
+      setAiRecommendPending([]);
+    } finally {
+      setAddingAiRecommend(false);
     }
   };
 
@@ -341,6 +399,58 @@ export default function TicketsList({ tripId }: TicketsListProps) {
               </div>
             )}
 
+            {/* AI 票券推薦候選清單 */}
+            {aiRecommendPending.length > 0 && (
+              <div className="mt-4 border border-green-200 rounded-xl p-3 bg-green-50/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">
+                    AI 推薦（{aiRecommendPending.filter((r) => r.checked).length} 項已勾選）
+                  </span>
+                  <button
+                    onClick={() => setAiRecommendPending([])}
+                    className="text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    取消
+                  </button>
+                </div>
+                <div className="space-y-1 max-h-60 overflow-y-auto">
+                  {aiRecommendPending.map((item, i) => (
+                    <label key={i} className="flex items-center gap-2 py-1 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        onChange={(e) =>
+                          setAiRecommendPending((prev) =>
+                            prev.map((r, idx) => idx === i ? { ...r, checked: e.target.checked } : r)
+                          )
+                        }
+                        className="rounded text-green-600"
+                      />
+                      <span className="text-sm text-gray-700 flex-1">{item.title}</span>
+                      <span className="text-xs text-gray-400">
+                        {TICKET_TYPES.find((t) => t.value === item.ticket_type)?.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    onClick={() => setAiRecommendPending((prev) => prev.map((r) => ({ ...r, checked: true })))}
+                    className="text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    全選
+                  </button>
+                  <button
+                    onClick={handleAddAiRecommend}
+                    disabled={addingAiRecommend || aiRecommendPending.every((r) => !r.checked)}
+                    className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {addingAiRecommend ? '新增中...' : `加入 ${aiRecommendPending.filter((r) => r.checked).length} 張票券`}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {showForm ? (
               <div className="mt-4 border border-dashed border-gray-200 rounded-xl p-4 space-y-3">
                 <div className="grid grid-cols-2 gap-3">
@@ -462,6 +572,28 @@ export default function TicketsList({ tripId }: TicketsListProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
                       </svg>
                       AI 辨識（多張）
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleAiRecommend}
+                  disabled={aiRecommending || !trip}
+                  className="flex-1 flex items-center justify-center gap-1 py-2.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 border border-dashed border-green-200 hover:border-green-300 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  {aiRecommending ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      AI 推薦中...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                      </svg>
+                      AI 推薦票券
                     </>
                   )}
                 </button>
