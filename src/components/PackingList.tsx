@@ -11,9 +11,10 @@ import AiRecommendForm from './AiRecommendForm';
 interface PackingListProps {
   tripId: string;
   trip: Trip;
+  weatherSummary?: string;
 }
 
-export default function PackingList({ tripId, trip }: PackingListProps) {
+export default function PackingList({ tripId, trip, weatherSummary }: PackingListProps) {
   const { items, isLoading, togglePacked, addItems, deleteItem } = usePackingList(tripId);
 
   const packedCount = items.filter((i) => i.packed).length;
@@ -49,7 +50,7 @@ export default function PackingList({ tripId, trip }: PackingListProps) {
           </div>
 
           {/* AI recommend */}
-          <AiRecommendForm trip={trip} existingItems={items} onAddItems={addItems} onReorganize={reorganizeWithAi} />
+          <AiRecommendForm trip={trip} existingItems={items} onAddItems={addItems} onReorganize={reorganizeWithAi} weatherSummary={weatherSummary} />
 
           {/* Packing categories */}
           {groupedItems.length > 0 ? (

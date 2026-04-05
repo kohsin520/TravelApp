@@ -308,17 +308,20 @@ export async function getAiPackingRecommendations(
   destination: string,
   days: number,
   season: string,
-  tripType: string
+  tripType: string,
+  weatherSummary?: string
 ): Promise<AiRecommendation[]> {
+  const weatherLine = weatherSummary ? `\n- 天氣：${weatherSummary}` : '';
   const prompt = `你是一個旅行行李打包專家。請根據以下旅行資訊推薦行李清單：
 - 目的地：${destination}
 - 天數：${days} 天
 - 季節：${season}
-- 旅行類型：${tripType}
+- 旅行類型：${tripType}${weatherLine}
 
 請回傳 JSON 格式，分為以下類別：衣物、3C、盥洗、證件、藥品、其他。
 每個類別列出建議攜帶的物品名稱（繁體中文）。
 不要重複基本款，專注在該目的地/季節/類型特別需要的物品。
+${weatherSummary ? '衣物類請根據天氣資訊給出具體適合的衣物建議。' : ''}
 
 回傳格式：
 [

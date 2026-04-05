@@ -11,11 +11,19 @@ import PackingList from '@/components/PackingList';
 import PreDepartureChecklist from '@/components/PreDepartureChecklist';
 import SideNav from '@/components/SideNav';
 import BottomNav from '@/components/BottomNav';
+import WeatherBlock from '@/components/WeatherBlock';
+import { useWeather, buildWeatherSummary } from '@/hooks/useWeather';
 
 export default function TripPage() {
   const params = useParams();
   const tripId = params.tripId as string;
   const [trip, setTrip] = useState<Trip | null>(null);
+  const { weather } = useWeather(
+    trip?.destination ?? '',
+    trip?.start_date,
+    trip?.days ?? 1
+  );
+  const weatherSummary = buildWeatherSummary(weather);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -67,9 +75,16 @@ export default function TripPage() {
         <SideNav />
         <div className="flex-1 min-w-0 space-y-6 pb-20 md:pb-0">
           <TripHeader trip={trip} />
-          <TicketsList tripId={tripId} />
+          {trip.start_date && (
+            <WeatherBlock
+              destination={trip.destination}
+              startDate={trip.start_date}
+              days={trip.days}
+            />
+          )}
+          <TicketsList tripId={tripId} trip={trip} />
           <HotelsList tripId={tripId} />
-          <PackingList tripId={tripId} trip={trip} />
+          <PackingList tripId={tripId} trip={trip} weatherSummary={weatherSummary} />
           <PreDepartureChecklist tripId={tripId} trip={trip} />
         </div>
       </div>

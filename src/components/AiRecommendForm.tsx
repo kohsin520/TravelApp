@@ -13,9 +13,10 @@ interface AiRecommendFormProps {
   existingItems: PackingItem[];
   onAddItems: (items: { category: string; item_name: string; source: string }[]) => void;
   onReorganize: (items: { category: string; item_name: string; source: string }[]) => void;
+  weatherSummary?: string;
 }
 
-export default function AiRecommendForm({ trip, existingItems, onAddItems, onReorganize }: AiRecommendFormProps) {
+export default function AiRecommendForm({ trip, existingItems, onAddItems, onReorganize, weatherSummary }: AiRecommendFormProps) {
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<AiRecommendation[] | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -38,6 +39,7 @@ export default function AiRecommendForm({ trip, existingItems, onAddItems, onReo
           days: trip.days,
           season: trip.season,
           tripType: trip.trip_type,
+          weatherSummary: weatherSummary ?? '',
         }),
       });
       if (!res.ok) throw new Error('AI 推薦失敗');
