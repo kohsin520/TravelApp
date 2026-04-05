@@ -84,3 +84,30 @@ export const TICKET_TYPES: { value: TicketType; label: string }[] = [
   { value: 'bus', label: '巴士' },
   { value: 'other', label: '其他' },
 ];
+
+// ─── Itinerary ───
+
+export type Period = 'morning' | 'afternoon' | 'evening';
+
+export const PERIOD_LABELS: Record<Period, string> = {
+  morning: '早上',
+  afternoon: '下午',
+  evening: '晚上',
+};
+
+export const PERIOD_ORDER: Record<Period, number> = {
+  morning: 0,
+  afternoon: 1,
+  evening: 2,
+};
+
+export const PERIODS: Period[] = ['morning', 'afternoon', 'evening'];
+
+export interface ItineraryItem {
+  id: string;
+  day: number;       // 1-based
+  period: Period;
+  activity: string;
+  order: number;     // within same day+period
+  created_at: string;
+}

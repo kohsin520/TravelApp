@@ -1,6 +1,6 @@
 import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
-import { Trip, PackingItem, ChecklistItem, Ticket, Hotel } from './types';
+import { Trip, PackingItem, ChecklistItem, Ticket, Hotel, ItineraryItem, Period, PERIOD_ORDER } from './types';
 
 function getAuth(): JWT {
   return new JWT({
@@ -362,6 +362,91 @@ export async function deleteHotel(tripId: string, hotelId: string): Promise<void
 export async function bulkUpdateHotelOrder(tripId: string, items: { id: string; order: number }[]): Promise<void> {
   const doc = await getDoc();
   const sheet = await getHotelSheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const orderMap = new Map(items.map((i) => [i.id, i.order]));
+  const toUpdate = rows.filter((r) => orderMap.has(r.get('id')));
+  for (const row of toUpdate) {
+    row.set('order', orderMap.get(row.get('id'))!);
+  }
+  await Promise.all(toUpdate.map((r) => r.save()));
+}
+
+// ─── Itinerary CRUD ───
+
+const ITINERARY_HEADERS = ['id', 'day', 'period', 'activity', 'order', 'created_at'];
+
+async function getItinerarySheet(doc: GoogleSpreadsheet, tripId: string) {
+  return getOrCreateSheet(doc, `${tripId}_itinerary`, ITINERARY_HEADERS);
+}
+
+export async function getItineraryItems(tripId: string): Promise<ItineraryItem[]> {
+  const doc = await getDoc();
+  const sheet = await getItinerarySheet(doc, tripId);
+  const rows = await sheet.getRows();
+  return rows
+    .map((r) => ({
+      id: r.get('id'),
+      day: Number(r.get('day')),
+      period: r.get('period') as Period,
+      activity: r.get('activity'),
+      order: Number(r.get('order')) || 0,
+      created_at: r.get('created_at'),
+    }))
+    .sort((a, b) =>
+      a.day - b.day ||
+      PERIOD_ORDER[a.period] - PERIOD_ORDER[b.period] ||
+      a.order - b.order
+    );
+}
+
+export async function addItineraryItems(
+  tripId: string,
+  items: Omit<ItineraryItem, 'created_at'>[]
+): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getItinerarySheet(doc, tripId);
+  const now = new Date().toISOString();
+  const rowData = items.map((item) => ({
+    id: item.id,
+    day: item.day,
+    period: item.period,
+    activity: item.activity,
+    order: item.order,
+    created_at: now,
+  }));
+  await sheet.addRows(rowData);
+}
+
+export async function updateItineraryItem(
+  tripId: string,
+  itemId: string,
+  updates: Partial<Pick<ItineraryItem, 'activity' | 'order'>>
+): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getItinerarySheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const row = rows.find((r) => r.get('id') === itemId);
+  if (!row) throw new Error('Item not found');
+  if (updates.activity !== undefined) row.set('activity', updates.activity);
+  if (updates.order !== undefined) row.set('order', updates.order);
+  await row.save();
+}
+
+export async function deleteItineraryItem(tripId: string, itemId: string): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getItinerarySheet(doc, tripId);
+  const rows = await sheet.getRows();
+  const row = rows.find((r) => r.get('id') === itemId);
+  if (!row) throw new Error('Item not found');
+  await row.delete();
+}
+
+export async function bulkUpdateItineraryOrder(
+  tripId: string,
+  items: { id: string; order: number }[]
+): Promise<void> {
+  const doc = await getDoc();
+  const sheet = await getItinerarySheet(doc, tripId);
   const rows = await sheet.getRows();
   const orderMap = new Map(items.map((i) => [i.id, i.order]));
   const toUpdate = rows.filter((r) => orderMap.has(r.get('id')));
