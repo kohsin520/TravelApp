@@ -13,6 +13,7 @@ import SideNav from '@/components/SideNav';
 import BottomNav from '@/components/BottomNav';
 import WeatherBlock from '@/components/WeatherBlock';
 import { useWeather, buildWeatherSummary } from '@/hooks/useWeather';
+import ItineraryBlock from '@/components/ItineraryBlock';
 
 export default function TripPage() {
   const params = useParams();
@@ -82,6 +83,7 @@ export default function TripPage() {
               days={trip.days}
             />
           )}
+          <ItineraryBlock tripId={tripId} trip={trip} weatherSummary={weatherSummary} />
           <TicketsList tripId={tripId} trip={trip} />
           <HotelsList tripId={tripId} />
           <PackingList tripId={tripId} trip={trip} weatherSummary={weatherSummary} />

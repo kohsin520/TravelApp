@@ -6,6 +6,7 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
+  { id: 'itinerary', label: '行程', type: 'scroll' },
   { id: 'tickets', label: '票券', type: 'scroll' },
   { id: 'hotels', label: '住宿', type: 'scroll' },
   { id: 'packing', label: '行李表', type: 'scroll' },
