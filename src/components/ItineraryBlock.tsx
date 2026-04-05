@@ -143,6 +143,7 @@ export default function ItineraryBlock({ tripId, trip, weatherSummary }: Itinera
   const previewDays = Array.from(new Set(previewItems.map((i) => i.day))).sort((a, b) => a - b);
 
   return (
+    <section id="itinerary">
     <CollapsibleCard
       title="行程"
       subtitle={items.length > 0 ? `${items.length} 個活動` : undefined}
@@ -345,5 +346,6 @@ export default function ItineraryBlock({ tripId, trip, weatherSummary }: Itinera
         </div>
       )}
     </CollapsibleCard>
+    </section>
   );
 }
