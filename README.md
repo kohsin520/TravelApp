@@ -1,33 +1,51 @@
 # TravelAPP — 出國旅遊計畫
 
-和旅伴一起整理行李、準備出國事項。有連結就能編輯，不需登入。
+個人旅遊規劃 app，用連結就能和旅伴共用，不需登入。
 
 ## 功能
 
-- **行李表** — 模板快速載入（海島/都市/滑雪/登山），分類收合，勾選打包進度
-- **事前準備** — 預設清單自動載入，勾選完成狀態
-- **AI 智慧推薦** — 根據目的地、天數、季節推薦行李（Gemini API）
-- **多人協作** — 分享連結給旅伴，30 秒自動同步
-- **手機友善** — 響應式設計，手機/平板/桌面都能用
+**行程規劃**
+- **行程表** — AI 一鍵生成完整每日行程（早/午/晚），或貼上文字讓 AI 解析
+- 每個活動可點地圖圖示直接開啟 Google Maps
+- 支援跨天、跨時段移動活動，同時段內可拖拉排序
+
+**票券 & 住宿**
+- 新增航班、火車、巴士、景點票券，附圖片/訂位代號/座位
+- AI 辨識票券照片自動填入資訊
+- AI 推薦目的地必買預訂票券
+- 住宿資訊管理（含 Google Maps、訂房網址）
+
+**行李 & 準備事項**
+- 行李表分類管理（衣物/3C/盥洗/證件/藥品/其他）
+- 模板快速載入（海島/都市/滑雪/登山）
+- AI 根據目的地、天數、天氣推薦行李
+- 事前準備清單，預設常見項目自動載入
+
+**天氣預報**
+- 出發日期後自動顯示旅遊期間每日天氣（Open-Meteo，免費無需 API key）
+- 天氣摘要自動帶入 AI 行李推薦
+
+**其他**
+- 分享連結給旅伴即可共同編輯，無需登入
+- 手機/平板/桌面響應式設計
+- PWA 支援（可加入主畫面）
 
 ## 技術棧
 
-- **Next.js** (App Router) + TypeScript + Tailwind CSS
-- **Google Sheets** — 資料儲存
-- **Gemini API** — AI 行李推薦
-- **SWR** — 客戶端資料抓取 + polling
+- **Next.js 16** (App Router) + TypeScript + Tailwind CSS v4
+- **Google Sheets** — 資料儲存（每個旅程獨立工作表）
+- **Gemini API** (gemini-2.5-flash-lite) — 行李推薦、票券辨識、行程生成/解析
+- **Open-Meteo** — 天氣預報（免費，無需 API key）
+- **SWR** — 客戶端資料抓取
+- **dnd-kit** — 拖拉排序
+- **Vercel** — 部署
 
 ## 快速開始
 
 ```bash
-# 安裝依賴
 npm install
-
-# 設定環境變數
 cp .env.example .env.local
-# 填入 Google Sheets 和 Gemini API 憑證
-
-# 啟動開發伺服器
+# 填入環境變數（見下方說明）
 npm run dev
 ```
 
@@ -38,30 +56,14 @@ npm run dev
 | 變數 | 說明 |
 |------|------|
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Google 服務帳戶 email |
-| `GOOGLE_PRIVATE_KEY` | 服務帳戶私鑰 |
+| `GOOGLE_PRIVATE_KEY` | 服務帳戶私鑰（完整 PEM，含換行） |
 | `GOOGLE_SHEET_ID` | Google Sheets 試算表 ID |
 | `GEMINI_API_KEY` | Gemini API 金鑰 |
-| `NEXT_PUBLIC_BASE_URL` | 網站網址 |
 
-## 部署（Synology NAS）
+多組 Gemini key 可用 `GEMINI_API_KEY_1`、`GEMINI_API_KEY_2`... 輪替，避免觸及速率限制。
 
-```bash
-docker compose up -d --build
-```
+## 部署
 
-推送到 `main` 分支會自動透過 GitHub Actions 部署到 NAS。
+推送到 `main` 分支後 Vercel 自動部署。
 
-### 內網 DNS 設定（hairpin NAT 問題）
-
-家裡連 WiFi 時，從內網打 DDNS 網址可能因路由器不支援 hairpin NAT 而無法連線。
-在每台裝置的 `/etc/hosts` 加入以下設定即可讓 HTTPS domain 走內網：
-
-```
-192.168.31.101    travel.wenchiehlee.synology.me
-```
-
-macOS 套用後需清 DNS cache：
-
-```bash
-sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder
-```
+需在 Vercel 專案設定中填入以上環境變數。`GOOGLE_PRIVATE_KEY` 直接貼入完整私鑰內容，不需加引號。
