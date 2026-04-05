@@ -423,7 +423,7 @@ export async function addItineraryItems(
 export async function updateItineraryItem(
   tripId: string,
   itemId: string,
-  updates: Partial<Pick<ItineraryItem, 'activity' | 'order'>>
+  updates: Partial<Pick<ItineraryItem, 'activity' | 'order' | 'day' | 'period'>>
 ): Promise<void> {
   const doc = await getDoc();
   const sheet = await getItinerarySheet(doc, tripId);
@@ -432,6 +432,8 @@ export async function updateItineraryItem(
   if (!row) throw new Error('Item not found');
   if (updates.activity !== undefined) row.set('activity', updates.activity);
   if (updates.order !== undefined) row.set('order', updates.order);
+  if (updates.day !== undefined) row.set('day', updates.day);
+  if (updates.period !== undefined) row.set('period', updates.period);
   await row.save();
 }
 

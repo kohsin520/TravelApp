@@ -29,7 +29,7 @@ export function useItinerary(tripId: string) {
 
   const updateItem = async (
     itemId: string,
-    updates: Partial<Pick<ItineraryItem, 'activity' | 'order'>>
+    updates: Partial<Pick<ItineraryItem, 'activity' | 'order' | 'day' | 'period'>>
   ) => {
     mutate(
       (current) => current?.map((i) => (i.id === itemId ? { ...i, ...updates } : i)),

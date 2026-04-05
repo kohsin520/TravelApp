@@ -167,6 +167,7 @@ export default function ItineraryBlock({ tripId, trip, weatherSummary }: Itinera
                 {dayItems.length > 0 ? (
                   <ItineraryDayGroup
                     day={day}
+                    tripDays={trip.days}
                     items={dayItems}
                     onUpdate={(itemId, updates) => updateItem(itemId, updates)}
                     onDelete={deleteItem}
