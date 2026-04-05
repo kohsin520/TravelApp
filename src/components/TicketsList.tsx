@@ -224,8 +224,13 @@ export default function TicketsList({ tripId, trip }: TicketsListProps) {
       });
       if (!res.ok) throw new Error('推薦失敗');
       const data = await res.json();
+      const recommendations = data.recommendations as AiTicketRecommendation[];
+      if (recommendations.length === 0) {
+        alert('AI 目前沒有推薦票券，請稍後再試');
+        return;
+      }
       setAiRecommendPending(
-        (data.recommendations as { title: string; ticket_type: TicketType }[]).map((r) => ({
+        recommendations.map((r) => ({
           ...r,
           checked: true,
         }))
@@ -246,7 +251,6 @@ export default function TicketsList({ tripId, trip }: TicketsListProps) {
           ticket_type: item.ticket_type,
           title: item.title,
           datetime: '',
-          datetimeTbd: true,
           seat: '',
           confirmation: '',
           note: '',
