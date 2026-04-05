@@ -154,7 +154,7 @@ export async function getChecklistItems(tripId: string): Promise<ChecklistItem[]
   return rows.map((r) => ({
     id: r.get('id'),
     task_name: r.get('task_name'),
-    done: r.get('done') === 'true',
+    done: String(r.get('done')).toLowerCase() === 'true',
     source: r.get('source') as ChecklistItem['source'],
     created_at: r.get('created_at'),
   }));
