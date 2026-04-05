@@ -178,7 +178,7 @@ export async function updateChecklistItem(
   tripId: string,
   itemId: string,
   updates: Partial<Pick<ChecklistItem, 'done' | 'task_name'>>
-): Promise<string> {
+): Promise<void> {
   const doc = await getDoc();
   const sheet = await getChecklistSheet(doc, tripId);
   const rows = await sheet.getRows();
@@ -187,7 +187,6 @@ export async function updateChecklistItem(
   if (updates.done !== undefined) row.set('done', String(updates.done));
   if (updates.task_name !== undefined) row.set('task_name', updates.task_name);
   await row.save();
-  return row.get('done');
 }
 
 export async function deleteChecklistItem(tripId: string, itemId: string): Promise<void> {
