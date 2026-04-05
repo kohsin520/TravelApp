@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { getChecklistItems, addChecklistItems, updateChecklistItem, deleteChecklistItem } from '@/lib/sheets';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const tripId = req.nextUrl.searchParams.get('tripId');

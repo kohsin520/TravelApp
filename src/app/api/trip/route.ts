@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { createTrip, getTrip } from '@/lib/sheets';
 import { addChecklistItems } from '@/lib/sheets';
+
+export const dynamic = 'force-dynamic';
 import { defaultChecklistItems } from '@/lib/templates';
 
 export async function POST(req: NextRequest) {
