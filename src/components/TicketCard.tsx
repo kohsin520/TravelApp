@@ -24,6 +24,7 @@ export default function TicketCard({ ticket, onUpdate, onDelete, dragHandle }: T
   const [datetimeTbd, setDatetimeTbd] = useState(!ticket.datetime);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [recognizing, setRecognizing] = useState(false);
 
   const handleSave = async () => {
     const updates: Record<string, string> = {};
@@ -35,6 +36,46 @@ export default function TicketCard({ ticket, onUpdate, onDelete, dragHandle }: T
       await onUpdate(ticket.id, updates);
     }
     setEditing(false);
+  };
+
+  const handleAiRecognize = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      setRecognizing(true);
+      try {
+        const { compressImage: compress } = await import('@/lib/imageUtils');
+        const dataUrl = await compress(file);
+        const res = await fetch('/api/ai/recognize-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ images: [dataUrl] }),
+        });
+        const data = await res.json();
+        if (data.results?.[0]) {
+          const r = data.results[0];
+          setForm((prev) => ({
+            ...prev,
+            ticket_type: r.ticket_type || prev.ticket_type,
+            title: r.title || prev.title,
+            datetime: r.datetimeTbd ? '' : (r.datetime || prev.datetime),
+            seat: r.seat || prev.seat,
+            confirmation: r.confirmation || prev.confirmation,
+            note: r.note || prev.note,
+            image: dataUrl,
+          }));
+          if (r.datetimeTbd) setDatetimeTbd(true);
+        }
+      } catch {
+        alert('AI 辨識失敗，請手動輸入');
+      } finally {
+        setRecognizing(false);
+      }
+    };
+    input.click();
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,13 +172,22 @@ export default function TicketCard({ ticket, onUpdate, onDelete, dragHandle }: T
             )}
           </div>
         </div>
-        <div className="flex gap-2 justify-end">
-          <button onClick={() => { setForm(ticket); setEditing(false); }} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
-            取消
+        <div className="flex gap-2 justify-between">
+          <button
+            onClick={handleAiRecognize}
+            disabled={recognizing}
+            className="px-3 py-1.5 text-sm text-purple-500 hover:text-purple-700 hover:bg-purple-50 border border-dashed border-purple-200 rounded-lg disabled:opacity-50 flex items-center gap-1"
+          >
+            {recognizing ? 'AI 辨識中...' : '📷 AI 辨識'}
           </button>
-          <button onClick={handleSave} className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            儲存
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => { setForm(ticket); setEditing(false); }} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
+              取消
+            </button>
+            <button onClick={handleSave} className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              儲存
+            </button>
+          </div>
         </div>
       </div>
     );
