@@ -137,6 +137,8 @@ export default function ItineraryBlock({ tripId, trip, weatherSummary }: Itinera
 
   const handleCancelPreview = () => {
     setPreviewItems([]);
+    // In paste mode, keep mode='paste' so textarea reappears for editing.
+    // In AI generate mode, mode is already 'idle' — this is a no-op.
     if (mode !== 'paste') setMode('idle');
   };
 
