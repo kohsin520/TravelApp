@@ -20,11 +20,14 @@ export function useChecklist(tripId: string) {
       (current) => current?.map((item) => (item.id === itemId ? { ...item, done } : item)),
       false
     );
-    await fetch('/api/checklist', {
+    const res = await fetch('/api/checklist', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tripId, itemId, updates: { done } }),
     });
+    if (!res.ok) {
+      mutate();
+    }
   };
 
   const addItems = async (items: { task_name: string }[]) => {

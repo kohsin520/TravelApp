@@ -5,6 +5,7 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const baseConfig: NextConfig = {
   output: "standalone",
+  allowedDevOrigins: ["travel.wenchiehlee.synology.me"],
 };
 
 const withSerwist = withSerwistInit({
