@@ -337,3 +337,35 @@ ${weatherSummary ? '衣物類請根據天氣資訊給出具體適合的衣物建
   if (!jsonMatch) throw new Error('Failed to parse AI response');
   return JSON.parse(jsonMatch[0]) as AiRecommendation[];
 }
+
+export interface AiTicketRecommendation {
+  title: string;
+  ticket_type: TicketType;
+}
+
+export async function getAiTicketRecommendations(
+  destination: string,
+  days: number,
+  tripType: string
+): Promise<AiTicketRecommendation[]> {
+  const prompt = `你是旅遊達人。請根據以下旅行資訊，推薦旅客應提前預訂的票券（景點門票、交通票卡、體驗活動、套票等）：
+- 目的地：${destination}
+- 天數：${days} 天
+- 旅行類型：${tripType}
+
+請列出 5~8 個最值得提前預訂的票券，回傳 JSON 陣列：
+[
+  { "title": "票券名稱（繁體中文，附上英文名稱如常見）", "ticket_type": "flight" | "train" | "bus" | "other" }
+]
+
+規則：
+- 只回傳 JSON 陣列，不要其他文字
+- ticket_type：火車/高鐵等陸上交通用 train，巴士用 bus，飛機用 flight，景點/體驗/套票用 other
+- 優先推薦熱門且常常售完、建議提前購買的票券
+- 以繁體中文為主，括號內可加英文名稱`;
+
+  const text = await generateText(prompt);
+  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error('無法解析 AI 回應');
+  return JSON.parse(jsonMatch[0]) as AiTicketRecommendation[];
+}
