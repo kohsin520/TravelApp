@@ -12,7 +12,7 @@ export function useChecklist(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR<ChecklistItem[]>(
     tripId ? `/api/checklist?tripId=${tripId}` : null,
     fetcher,
-    { refreshInterval: 30000 }
+    { refreshInterval: 120000 }
   );
 
   const toggleDone = async (itemId: string, done: boolean) => {

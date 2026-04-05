@@ -16,7 +16,7 @@ export function useHotels(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR<Hotel[]>(
     tripId ? `/api/hotels?tripId=${tripId}` : null,
     fetcher,
-    { refreshInterval: 30000 }
+    { refreshInterval: 120000 }
   );
 
   const addHotel = async (hotel: Omit<Hotel, 'id' | 'created_at'>) => {

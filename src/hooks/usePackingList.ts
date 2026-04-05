@@ -12,7 +12,7 @@ export function usePackingList(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR<PackingItem[]>(
     tripId ? `/api/packing?tripId=${tripId}` : null,
     fetcher,
-    { refreshInterval: 30000 }
+    { refreshInterval: 120000 }
   );
 
   const togglePacked = async (itemId: string, packed: boolean) => {

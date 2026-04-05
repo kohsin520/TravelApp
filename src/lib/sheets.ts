@@ -381,7 +381,10 @@ async function getItinerarySheet(doc: GoogleSpreadsheet, tripId: string) {
 
 export async function getItineraryItems(tripId: string): Promise<ItineraryItem[]> {
   const doc = await getDoc();
-  const sheet = await getItinerarySheet(doc, tripId);
+  // Don't auto-create the sheet on read — return empty if it doesn't exist yet
+  const sheet = doc.sheetsByTitle[`${tripId}_itinerary`];
+  if (!sheet) return [];
+  await sheet.loadHeaderRow();
   const rows = await sheet.getRows();
   return rows
     .map((r) => ({

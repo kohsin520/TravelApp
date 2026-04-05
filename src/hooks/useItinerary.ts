@@ -12,7 +12,7 @@ export function useItinerary(tripId: string) {
   const { data, error, isLoading, mutate } = useSWR<ItineraryItem[]>(
     tripId ? `/api/itinerary?tripId=${tripId}` : null,
     fetcher,
-    { refreshInterval: 30000 }
+    { refreshInterval: 120000 }
   );
 
   const addItems = async (items: Omit<ItineraryItem, 'id' | 'created_at'>[]) => {
