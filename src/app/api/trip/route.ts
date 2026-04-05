@@ -9,7 +9,7 @@ import { defaultChecklistItems } from '@/lib/templates';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { trip_name, destination, days, season, trip_type } = body;
+    const { trip_name, destination, days, season, trip_type, start_date } = body;
 
     if (!trip_name || !destination || !days || !season || !trip_type) {
       return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 });
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       days: Number(days),
       season,
       trip_type,
+      start_date: start_date || undefined,
       created_at: new Date().toISOString(),
     };
 

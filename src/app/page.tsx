@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TRIP_TYPES, SEASONS } from '@/lib/types';
+import { TRIP_TYPES } from '@/lib/types';
 import { getTripHistory, removeTripFromHistory, TripRecord, saveTripToHistory } from '@/lib/tripHistory';
+
+function calculateSeason(dateStr: string): string {
+  const month = new Date(dateStr).getMonth() + 1;
+  if (month >= 3 && month <= 5) return 'spring';
+  if (month >= 6 && month <= 8) return 'summer';
+  if (month >= 9 && month <= 11) return 'autumn';
+  return 'winter';
+}
 
 export default function Home() {
   const router = useRouter();
@@ -18,7 +26,7 @@ export default function Home() {
     trip_name: '',
     destination: '',
     days: 5,
-    season: 'summer',
+    start_date: '',
     trip_type: 'city',
   });
 
@@ -26,10 +34,11 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     try {
+      const season = form.start_date ? calculateSeason(form.start_date) : 'summer';
       const res = await fetch('/api/trip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, season }),
       });
       const data = await res.json();
       if (data.tripId) {
@@ -97,18 +106,13 @@ export default function Home() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">季節</label>
-              <select
-                value={form.season}
-                onChange={(e) => setForm({ ...form, season: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
-              >
-                {SEASONS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
+              <label className="block text-sm font-medium text-gray-700 mb-1">出發日期</label>
+              <input
+                type="date"
+                value={form.start_date}
+                onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">類型</label>
