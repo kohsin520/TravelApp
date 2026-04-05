@@ -5,6 +5,7 @@ export interface Trip {
   days: number;
   season: string;
   trip_type: string;
+  start_date?: string;   // YYYY-MM-DD
   created_at: string;
 }
 

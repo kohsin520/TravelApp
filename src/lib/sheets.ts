@@ -25,13 +25,20 @@ async function getOrCreateSheet(
   let sheet = doc.sheetsByTitle[title];
   if (!sheet) {
     sheet = await doc.addSheet({ title, headerValues: headers });
+  } else {
+    await sheet.loadHeaderRow();
+    const existing = sheet.headerValues ?? [];
+    const missing = headers.filter((h) => !existing.includes(h));
+    if (missing.length > 0) {
+      await sheet.setHeaderRow([...existing, ...missing]);
+    }
   }
   return sheet;
 }
 
 // ─── Trip CRUD ───
 
-const TRIP_HEADERS = ['trip_id', 'trip_name', 'destination', 'days', 'season', 'trip_type', 'created_at'];
+const TRIP_HEADERS = ['trip_id', 'trip_name', 'destination', 'days', 'season', 'trip_type', 'start_date', 'created_at'];
 
 export async function createTrip(trip: Trip): Promise<void> {
   const doc = await getDoc();
@@ -43,6 +50,7 @@ export async function createTrip(trip: Trip): Promise<void> {
     days: trip.days,
     season: trip.season,
     trip_type: trip.trip_type,
+    start_date: trip.start_date ?? '',
     created_at: trip.created_at,
   });
 }
@@ -61,6 +69,7 @@ export async function getTrip(tripId: string): Promise<Trip | null> {
     days: Number(row.get('days')),
     season: row.get('season'),
     trip_type: row.get('trip_type'),
+    start_date: row.get('start_date') || undefined,
     created_at: row.get('created_at'),
   };
 }
