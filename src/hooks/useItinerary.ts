@@ -16,12 +16,15 @@ export function useItinerary(tripId: string) {
   );
 
   const addItems = async (items: Omit<ItineraryItem, 'id' | 'created_at'>[]) => {
-    await fetch('/api/itinerary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tripId, items }),
-    });
-    mutate();
+    try {
+      await fetch('/api/itinerary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId, items }),
+      });
+    } finally {
+      mutate();
+    }
   };
 
   const updateItem = async (
@@ -64,7 +67,9 @@ export function useItinerary(tripId: string) {
         if (!current) return current;
         const updateMap = new Map(updates.map((u) => [u.id, u.order]));
         return current.map((i) =>
-          updateMap.has(i.id) ? { ...i, order: updateMap.get(i.id)! } : i
+          i.day === day && i.period === period && updateMap.has(i.id)
+            ? { ...i, order: updateMap.get(i.id)! }
+            : i
         );
       },
       false
