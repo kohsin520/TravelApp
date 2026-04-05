@@ -406,24 +406,35 @@ export async function generateItinerary(
 }
 
 export async function parseItinerary(itineraryText: string): Promise<ItineraryItemAI[]> {
-  const prompt = `請將以下行程文字解析成結構化格式。
+  const prompt = `請將以下行程文字解析成結構化格式，每個「具體地點、餐廳、景點、活動」都要獨立成一筆。
 
 行程文字：
 ${itineraryText}
 
 解析規則：
-- day 從 1 開始（第一天=1, Day1=1, 第二天=2...）
-- period 只能是以下三種：
-  - 早上/上午/morning/AM → "morning"
-  - 下午/午後/afternoon/PM → "afternoon"
-  - 晚上/夜晚/evening/night → "evening"
-  - 若無法判斷：早餐類→morning，晚餐類→evening，其他→afternoon
-- activity：保留原文活動名稱，保持繁體中文
+1. day 從 1 開始（Day 1 = 1, Day 2 = 2, 第一天 = 1...）
+2. period 只能是：
+   - 早上/上午/morning/09:xx/10:xx/11:xx → "morning"
+   - 下午/午後/afternoon/12:xx/13:xx/14:xx/15:xx/16:xx → "afternoon"
+   - 晚上/夜晚/evening/17:xx/18:xx/19:xx/20:xx/21:xx/22:xx → "evening"
+3. activity 規則（最重要）：
+   - 每個具體地點、餐廳、景點、店家都要獨立成一筆
+   - 直接使用店家/景點的名稱，例如：「澳洲牛奶公司」「M+ 博物館」「K11 MUSEA」「甘牌燒鵝」
+   - 若名稱後有括號補充說明，可保留，例如：「澳洲牛奶公司（佐敦）」
+   - 不要用時間描述（如「10:00 抵達」），不要用動詞開頭（如「前往」「搭乘」）
+   - 若一個時段有多個地點，每個地點各自一筆
 
-回傳 JSON 陣列（不要有其他文字）：
+範例輸入：
+• 10:00 - 11:30：抵達飯店，步行前往澳洲牛奶公司（佐敦）吃早餐
+• 13:00 - 16:30：搭車前往 M+ 博物館
+
+範例輸出：
 [
-  { "day": 1, "period": "morning", "activity": "活動名稱" }
-]`;
+  { "day": 1, "period": "morning", "activity": "澳洲牛奶公司（佐敦）" },
+  { "day": 1, "period": "afternoon", "activity": "M+ 博物館" }
+]
+
+回傳 JSON 陣列（不要有其他文字）：`;
 
   const text = await generateText(prompt);
   const jsonMatch = text.match(/\[[\s\S]*\]/);
